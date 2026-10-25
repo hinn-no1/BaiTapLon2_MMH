@@ -61,8 +61,6 @@ Chạy trong thư mục `app` (Windows):
 
 Script xuất `benchmark_results.json` và `benchmark_results.csv`. Benchmark có 17 phép đo cho RSA-2048/RSA-3072/ECDSA-P256, ECDH/DH và hai AEAD; không đo Ed25519. ECDH bao gồm HKDF, DH-2048 đo bí mật DH thô; thời gian AEAD gồm chuyển đổi hex và chi phí Python. Dữ liệu AEAD đo có kích thước 1 MiB.
 
-Xem `docs/TEST_STATUS.md` cho kết quả đã chạy. Báo cáo phần 3 mới nằm trong `docs/Phan_tich_thiet_ke_he_thong_va_kiem_tra_web.docx`; tài liệu Word cũ khác trong `docs` được giữ để tham khảo, không dùng thay báo cáo cập nhật.
-
 ## Cấu trúc
 
 - `app/app.py`: Flask và các API thử nghiệm độc lập.
@@ -73,7 +71,6 @@ Xem `docs/TEST_STATUS.md` cho kết quả đã chạy. Báo cáo phần 3 mới 
 - `app/function/key_exchange.py`, `aead.py`: DH/ECDH/HKDF và AEAD bằng PyCryptodome.
 - `app/function/mini_pki.py`, `mitm.py`, `toy_ecdsa.py`, `hash_hmac.py`: các bài thử và hàm nền từ bản gốc.
 - `app/templates/index.html`, `app/static/script.js`, `style.css`: trang thao tác.
-- `app/tests_crypto.py`, `tests_regressions.py`, `tests_workflow.py`: kiểm thử tự động.
 
 ## Phạm vi mô phỏng
 
