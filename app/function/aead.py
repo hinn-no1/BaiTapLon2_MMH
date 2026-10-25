@@ -27,7 +27,7 @@ def _cipher(algorithm: str, key: bytes, nonce: bytes):
 
 def encrypt(key: bytes, plaintext: bytes, aad: bytes,
             algorithm: str = 'AES-256-GCM') -> dict:
-    nonce = get_random_bytes(12)  # fresh random nonce per encryption with this key
+    nonce = get_random_bytes(12)
     cipher = _cipher(algorithm, key, nonce)
     cipher.update(aad)
     ciphertext, tag = cipher.encrypt_and_digest(plaintext)
@@ -45,7 +45,6 @@ def decrypt(key: bytes, packet: dict) -> bytes:
         cipher.update(aad)
         return cipher.decrypt_and_verify(ciphertext, tag)
     except (ValueError, KeyError, TypeError) as exc:
-        # Uniform error: do not release unauthenticated plaintext.
         raise ValueError('thẻ xác thực không hợp lệ') from exc
 
 
