@@ -9,7 +9,6 @@ from Crypto.Protocol.KDF import HKDF
 from Crypto.Hash import SHA256
 from Crypto.Util.number import isPrime
 
-# RFC 3526, section 3, 2048-bit MODP group (group 14), generator 2.
 RFC3526_GROUP14_P = int('''
 FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1 29024E08
 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD EF9519B3 CD3A431B
@@ -31,7 +30,6 @@ def toy_dh(p: int = 23, g: int = 5, a: int = 6, b: int = 15) -> dict:
         raise ValueError('DH số nhỏ yêu cầu p nguyên tố trong [5, 65535]')
     if not 2 <= g <= p - 2:
         raise ValueError('g phải thuộc [2, p-2]')
-    # Verify that g generates the multiplicative group, rather than a subgroup.
     remaining, factors, divisor = p - 1, set(), 2
     while divisor * divisor <= remaining:
         while remaining % divisor == 0:
@@ -107,12 +105,10 @@ def dh2048_secret(a: int, B: int) -> int:
     q = (p - 1) // 2
     if not 2 <= B <= p - 2 or pow(B, q, p) != 1:
         raise ValueError('Invalid DH-2048 peer public value/subgroup')
-    # Reject subgroup reflection/trivial small order values in this classroom demo.
     return pow(B, a, p)
 
 
 def dh2048_keypair():
-    # For benchmarking classical group 14, not a replacement for a hardened TLS library.
     a = secrets.randbelow((RFC3526_GROUP14_P - 1) // 2 - 3) + 2
     return a, pow(2, a, RFC3526_GROUP14_P)
 
