@@ -1,0 +1,45 @@
+{
+  "description": "REFERENCE ONLY: cryptography backend, not PyCryptodome; n=20",
+  "python": "3.13.5",
+  "os": "Linux-6.18.55-x86_64-with-glibc2.41",
+  "ecdh_keygen": {
+    "mean_ms": 0.01828,
+    "median_ms": 0.01456,
+    "min_ms": 0.01423,
+    "max_ms": 0.06297
+  },
+  "dh2048_keygen": {
+    "mean_ms": 24.30396,
+    "median_ms": 23.98128,
+    "min_ms": 21.74009,
+    "max_ms": 31.17588
+  },
+  "ecdh_agreement_and_hkdf": {
+    "mean_ms": 0.08045,
+    "median_ms": 0.06325,
+    "min_ms": 0.06257,
+    "max_ms": 0.25698
+  },
+  "dh2048_agreement": {
+    "mean_ms": 29.87556,
+    "median_ms": 29.19739,
+    "min_ms": 26.61942,
+    "max_ms": 36.751
+  },
+  "AES-256-GCM": {
+    "encrypt_1MiB": {
+      "mean_ms": 0.54128
+    },
+    "decrypt_1MiB": {
+      "mean_ms": 0.33786
+    }
+  },
+  "ChaCha20-Poly1305": {
+    "encrypt_1MiB": {
+      "mean_ms": 0.46601
+    },
+    "decrypt_1MiB": {
+      "mean_ms": 0.48906
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "metadata": {
+    "backend": "cryptography (reference only)",
+    "runs": 20,
+    "python": "3.13.5",
+    "system": "Linux-6.18.55-x86_64-with-glibc2.41",
+    "timer": "perf_counter_ns",
+    "units": "ms"
+  },
+  "signatures": {
+    "RSA-2048": {
+      "keygen": {
+        "mean_ms": 60.96414,
+        "median_ms": 53.60746,
+        "min_ms": 17.56986,
+        "max_ms": 173.24807,
+        "runs": 20
+      },
+      "sign": {
+        "mean_ms": 0.43609,
+        "median_ms": 0.38351,
+        "min_ms": 0.31578,
+        "max_ms": 0.72768,
+        "runs": 20
+      },
+      "verify": {
+        "mean_ms": 0.5124,
+        "median_ms": 0.03035,
+        "min_ms": 0.02657,
+        "max_ms": 5.14021,
+        "runs": 20
+      },
+      "signature_bytes": 256,
+      "public_key_pem_bytes": 451,
+      "private_key_pem_bytes": 1704
+    },
+    "RSA-3072": {
+      "keygen": {
+        "mean_ms": 222.59443,
+        "median_ms": 238.43279,
+        "min_ms": 53.68814,
+        "max_ms": 477.97613,
+        "runs": 20
+      },
+      "sign": {
+        "mean_ms": 1.09212,
+        "median_ms": 0.98816,
+        "min_ms": 0.8614,
+        "max_ms": 1.91866,
+        "runs": 20
+      },
+      "verify": {
+        "mean_ms": 0.09649,
+        "median_ms": 0.05256,
+        "min_ms": 0.04809,
+        "max_ms": 0.60299,
+        "runs": 20
+      },
+      "signature_bytes": 384,
+      "public_key_pem_bytes": 625,
+      "private_key_pem_bytes": 2484
+    },
+    "ECDSA-P256": {
+      "keygen": {
+        "mean_ms": 0.01635,
+        "median_ms": 0.0153,
+        "min_ms": 0.01498,
+        "max_ms": 0.03323,
+        "runs": 20
+      },
+      "sign": {
+        "mean_ms": 0.03435,
+        "median_ms": 0.02732,
+        "min_ms": 0.02667,
+        "max_ms": 0.1246,
+        "runs": 20
+      },
+      "verify": {
+        "mean_ms": 0.1125,
+        "median_ms": 0.08217,
+        "min_ms": 0.07695,
+        "max_ms": 0.41477,
+        "runs": 20
+      },
+      "signature_bytes": 70,
+      "public_key_pem_bytes": 178,
+      "private_key_pem_bytes": 241
+    }
+  }
+}
