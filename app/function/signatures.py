@@ -1,9 +1,42 @@
 import time
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import ec, padding
 from cryptography.exceptions import InvalidSignature
 
+ALGORITHMS = ('RSA-PSS', 'ECDSA', 'Ed25519')
+
+
+def sign_bytes(private_key, message: bytes, algorithm: str) -> bytes:
+    if algorithm == 'RSA-PSS':
+        return private_key.sign(message, padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH), hashes.SHA256())
+    if algorithm == 'ECDSA':
+        return private_key.sign(message, ec.ECDSA(hashes.SHA256()))
+    if algorithm == 'Ed25519':
+        return private_key.sign(message)
+    raise ValueError('Thuật toán chữ ký không được hỗ trợ')
+
+
+def verify_bytes(public_key, message: bytes, signature: bytes, algorithm: str) -> bool:
+    if algorithm not in ALGORITHMS:
+        raise ValueError('Thuật toán chữ ký không được hỗ trợ')
+    try:
+        if algorithm == 'RSA-PSS':
+            public_key.verify(signature, message, padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH), hashes.SHA256())
+        elif algorithm == 'ECDSA':
+            public_key.verify(signature, message, ec.ECDSA(hashes.SHA256()))
+        else:
+            public_key.verify(signature, message)
+        return True
+    except (InvalidSignature, ValueError, TypeError):
+        return False
+
 def sign_and_verify_demo(private_key, public_key, message: bytes, algorithm: str, attacker_private_key):
+    if algorithm not in ('RSA-PSS', 'ECDSA', 'Ed25519'):
+        raise ValueError(f"Thuật toán {algorithm} không được hỗ trợ.")
+    if not isinstance(message, bytes):
+        raise TypeError("Thông điệp ký phải là bytes; hãy mã hóa văn bản bằng UTF-8.")
     results = {}
     
     start_sign = time.perf_counter()
@@ -17,6 +50,8 @@ def sign_and_verify_demo(private_key, public_key, message: bytes, algorithm: str
     sign_time = (time.perf_counter() - start_sign) * 1000
     
     results['signature_size_bytes'] = len(signature)
+    results['signature_hex'] = signature.hex()
+    results['algorithm'] = algorithm
     results['sign_time_ms'] = sign_time
 
     def verify(msg, sig):
@@ -38,7 +73,11 @@ def sign_and_verify_demo(private_key, public_key, message: bytes, algorithm: str
     results['scenario_valid'] = {"success": valid, "verify_time_ms": v_time, "msg": msg_ok}
 
     tampered_message = bytearray(message)
-    tampered_message[-1] ^= 0xFF
+    if tampered_message:
+        tampered_message[-1] ^= 0xFF
+    else:
+        # Signing an empty message is valid; adding a byte changes its content.
+        tampered_message.append(0x01)
     valid_tampered, _, msg_fail_tampered = verify(bytes(tampered_message), signature)
     results['scenario_tampered_content'] = {"success": valid_tampered, "msg": msg_fail_tampered}
 
