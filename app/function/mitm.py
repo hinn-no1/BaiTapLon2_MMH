@@ -1,4 +1,3 @@
-"""B.2.6: actual ECDH key substitution (unauth) and blocked forgery (auth)."""
 from __future__ import annotations
 import hashlib
 import secrets
