@@ -7,6 +7,7 @@ from Crypto.PublicKey import ECC
 from Crypto.Protocol.DH import key_agreement
 from Crypto.Protocol.KDF import HKDF
 from Crypto.Hash import SHA256
+from Crypto.Util.number import isPrime
 
 # RFC 3526, section 3, 2048-bit MODP group (group 14), generator 2.
 RFC3526_GROUP14_P = int('''
@@ -24,8 +25,23 @@ FFFFFFFF'''.replace(' ', '').replace('\n', ''), 16)
 
 def toy_dh(p: int = 23, g: int = 5, a: int = 6, b: int = 15) -> dict:
     """Small-group DH is ONLY a classroom demonstration; not secure."""
-    if p != 23 or g != 5:
-        raise ValueError('Bài mẫu yêu cầu p=23, g=5.')
+    if any(type(v) is not int for v in (p, g, a, b)):
+        raise ValueError('p, g, a, b phải là số nguyên')
+    if not 5 <= p <= 65535 or not isPrime(p):
+        raise ValueError('DH số nhỏ yêu cầu p nguyên tố trong [5, 65535]')
+    if not 2 <= g <= p - 2:
+        raise ValueError('g phải thuộc [2, p-2]')
+    # Verify that g generates the multiplicative group, rather than a subgroup.
+    remaining, factors, divisor = p - 1, set(), 2
+    while divisor * divisor <= remaining:
+        while remaining % divisor == 0:
+            factors.add(divisor)
+            remaining //= divisor
+        divisor += 1
+    if remaining > 1:
+        factors.add(remaining)
+    if any(pow(g, (p - 1) // q, p) == 1 for q in factors):
+        raise ValueError('g phải là phần tử sinh modulo p')
     if not (1 <= a < p - 1 and 1 <= b < p - 1):
         raise ValueError('Số mũ phải thuộc [1, p-2].')
     A, B = pow(g, a, p), pow(g, b, p)
