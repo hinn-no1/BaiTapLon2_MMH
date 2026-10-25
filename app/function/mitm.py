@@ -53,7 +53,7 @@ def auth_transcript(*, session_id: str, sender: str, recipient: str,
 def authenticated_mitm(message: str, algorithm: str = 'AES-256-GCM') -> dict:
     logs = []
     pki = make_demo_pki()
-    ca_public = pki['ca_private'].public_key()  # pinned, trusted CA public key
+    ca_public = pki['ca_private'].public_key()
     alice_eph, bob_eph, eve_eph = (create_ecdh_party() for _ in range(3))
     session_id = secrets.token_hex(16)
     transcript = auth_transcript(session_id=session_id, sender='Alice', recipient='Bob',
@@ -65,13 +65,11 @@ def authenticated_mitm(message: str, algorithm: str = 'AES-256-GCM') -> dict:
                                         ca_public=ca_public, expected_subject='Alice')
     logs.append('3. Bob xác minh CA → chứng thư Alice: HỢP LỆ, subject = Alice.')
 
-    # Attack #1: replace Alice ephemeral key, reuse Alice's original signature.
     forged = dict(transcript, ephemeral_public_key=public_key_pem(eve_eph))
     substituted_signature_ok = check_signature(alice_identity, forged, alice_sig)
     assert not substituted_signature_ok
     logs.append('4. Eve thay A bằng E=eG nhưng giữ chữ ký Alice: KHÔNG HỢP LỆ.')
 
-    # Attack #2: Eve signs with their own valid certificate, still not Alice.
     eve_subject_rejected = False
     try:
         verify_certificate(pki['eve_cert'], ca_public=ca_public, expected_subject='Alice')
@@ -79,7 +77,6 @@ def authenticated_mitm(message: str, algorithm: str = 'AES-256-GCM') -> dict:
         eve_subject_rejected = True
         logs.append('5. Eve đưa chứng thư thật của Eve: BỊ CHẶN (' + str(exc) + ').')
     assert eve_subject_rejected
-    # Untampered Alice transcript verifies and can establish a secure authenticated channel.
     original_signature_ok = check_signature(alice_identity, transcript, alice_sig)
     assert original_signature_ok
     bob_identity = verify_certificate(pki['bob_cert'], ca_public=ca_public,
