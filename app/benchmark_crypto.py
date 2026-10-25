@@ -73,7 +73,6 @@ def measure_signatures(runs, result):
 
 
 def measure_key_exchange(runs, result):
-    # Separate key generation from key agreement. Both algorithms compute one side's secret.
     for algorithm in ('ECDH-P256', 'DH-2048'):
         keygens, agreements = [], []
         for _ in range(runs):
@@ -95,7 +94,7 @@ def measure_key_exchange(runs, result):
 
 
 def measure_aead(runs, result):
-    plaintext = get_random_bytes(1024 * 1024)  # Exactly 1 MiB per run
+    plaintext = get_random_bytes(1024 * 1024)
     aad = make_aad('Alice', 'Bob', 1)
     key = get_random_bytes(32)
     for algorithm in ('AES-256-GCM', 'ChaCha20-Poly1305'):
