@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kênh liên lạc an toàn – B.2.5/B.2.6</title>
+<link rel="stylesheet" href="/static/style.css"></head>
+<body><main>
+<header><h1>Trao đổi khóa &amp; MITM</h1><p>Bài thực hành số 2 • DH/ECDH + HKDF + AEAD • Mô phỏng để học, không dùng truyền tin thực tế.</p></header>
+<section><h2>1. Thử nghiệm DH số nhỏ (p=23, g=5)</h2>
+<button id="toy-dh">Chạy DH và MITM số nhỏ</button><pre id="toy-dh-out" aria-live="polite"></pre></section>
+<section><h2>2. ECDH P-256 + HKDF-SHA256</h2>
+<button id="ecdh">Tạo khóa phiên</button><pre id="ecdh-out" aria-live="polite"></pre></section>
+<section><h2>3. Mã hóa có xác thực</h2>
+<label>Thông điệp (≤200 ký tự)<textarea id="message" maxlength="200">Xin chào Bob!</textarea></label>
+<label>Thuật toán <select id="algorithm"><option>AES-256-GCM</option><option>ChaCha20-Poly1305</option></select></label>
+<div class="buttons"><button id="encrypt">Mã hóa, giải mã, sửa bit</button><button id="mitm">Mô phỏng MITM 2 chế độ</button></div>
+<h3>Kết quả AEAD</h3><pre id="encrypt-out" aria-live="polite"></pre>
+<h3>Nhật ký MITM</h3><div id="mitm-out" aria-live="polite"></div></section>
+<section><h2>4. Mở rộng ECDSA số nhỏ</h2>
+<p>E₁₇(3,5), G=(5,3), n=23, d=7, h=10, k=5.</p>
+<button id="toy-ecdsa">Ký và kiểm tra</button><pre id="toy-ecdsa-out" aria-live="polite"></pre></section>
+<section><h2>5. Benchmark ≥20 lượt</h2>
+<p>Trong thư mục <code>app/</code>, chạy <code>python benchmark_crypto.py --runs 20</code>, rồi nhấn nút để xem JSON kết quả.</p>
+<button id="bench">Tải kết quả đã đo</button><pre id="bench-out" aria-live="polite"></pre></section>
+</main><script src="/static/script.js"></script></body></html>
