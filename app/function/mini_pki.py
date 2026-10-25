@@ -1,4 +1,3 @@
-"""Minimal JSON CA for MITM demo. Not an X.509 implementation."""
 from __future__ import annotations
 import json
 import secrets
@@ -42,7 +41,6 @@ def issue_certificate(ca_private, subject: str, owner_public, *,
 
 def verify_certificate(cert: dict, *, ca_public, expected_subject: str,
                        issuer: str = 'Demo-CA', revoked_serials=()) -> ECC.EccKey:
-    """Trust anchor (ca_public) must be configured independently of the received cert."""
     required = ('subject', 'issuer', 'public_key', 'serial', 'not_before', 'not_after', 'signature')
     if not all(k in cert for k in required):
         raise ValueError('Chứng thư thiếu trường bắt buộc')
@@ -75,7 +73,6 @@ def make_demo_pki() -> dict:
     bob = ECC.generate(curve='P-256')
     eve = ECC.generate(curve='P-256')
     root = issue_certificate(ca, 'Demo-CA', ca.public_key())
-    # The pinned CA public key is the trust anchor, not a key claimed by a remote peer.
     verify_certificate(root, ca_public=ca.public_key(), expected_subject='Demo-CA')
     return {
         'ca_private': ca, 'alice_private': alice, 'bob_private': bob,
