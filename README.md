@@ -1,4 +1,4 @@
-# BaiTapLon2_MMH — B.2.5/B.2.6 + kiểm thử crypto
+# BaiTapLon2_MMH
 
 > Bản tích hợp từ ZIP dự án nhóm (25/10/2026). Các module `key_exchange.py`, `aead.py`, `mitm.py`, `mini_pki.py`, `toy_ecdsa.py`, giao diện và benchmark được bổ sung để minh họa kênh liên lạc an toàn. Demo trên cùng một Flask server **không phải** ứng dụng chat an toàn để triển khai thực tế: server nắm khóa riêng nhằm mô phỏng Alice/Bob/Eve. Không lưu/hiển thị khóa riêng qua API.
 
