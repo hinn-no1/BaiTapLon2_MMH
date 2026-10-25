@@ -22,7 +22,6 @@ function show(id, value) {
     const indent = '  '.repeat(depth);
     const childIndent = '  '.repeat(depth + 1);
 
-    // Hiển thị khóa PEM trên nhiều dòng.
     if (typeof item === 'string') {
       const isPem =
         item.startsWith('-----BEGIN ') &&
