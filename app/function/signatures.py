@@ -76,7 +76,6 @@ def sign_and_verify_demo(private_key, public_key, message: bytes, algorithm: str
     if tampered_message:
         tampered_message[-1] ^= 0xFF
     else:
-        # Signing an empty message is valid; adding a byte changes its content.
         tampered_message.append(0x01)
     valid_tampered, _, msg_fail_tampered = verify(bytes(tampered_message), signature)
     results['scenario_tampered_content'] = {"success": valid_tampered, "msg": msg_fail_tampered}
