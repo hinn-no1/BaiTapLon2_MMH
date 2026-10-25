@@ -188,7 +188,6 @@ class Lab:
             ap = self.verify_cert(self.certificates['alice'], self.names['alice'], self.revoked)
             bp = self.verify_cert(self.certificates['bob'], self.names['bob'], self.revoked)
             salt = secrets.token_bytes(32)
-            # Bind both ephemeral keys, identities, AEAD suite, salt and session ID.
             transcript = {'session_id': sid, 'alice': self.names['alice'], 'bob': self.names['bob'],
                           'alice_ephemeral': public_key_pem(alice), 'bob_ephemeral': public_key_pem(bob),
                           'salt': salt.hex(), 'aead': algorithm}
