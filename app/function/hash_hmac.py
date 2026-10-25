@@ -4,7 +4,7 @@ import time
 
 MIN_FILE_SIZE = 10_000_000
 CHUNK_SIZE = 1024 * 1024
-HASH_ALGORITHMS = ("sha256", "sha1", "md5")  # SHA-1/MD5: comparison ONLY
+HASH_ALGORITHMS = ("sha256", "sha1", "md5")
 
 def create_hmac(message, key):
     """Tạo thẻ HMAC-SHA256 và trả về dưới dạng chuỗi hex."""
