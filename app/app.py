@@ -13,6 +13,16 @@ import secrets
 app = Flask(__name__)
 app.json.ensure_ascii = False
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
+app.secret_key = secrets.token_bytes(32)
+app.config.update(MAX_CONTENT_LENGTH=11 * 1024 * 1024,
+                  SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE='Lax')
+from lab_routes import bp as lab_blueprint
+app.register_blueprint(lab_blueprint)
+
+
+@app.errorhandler(413)
+def too_large(err):
+    return jsonify(error='Yêu cầu quá lớn; tệp tối đa 10 MiB'), 413
 
 
 def _payload():

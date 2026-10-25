@@ -1,0 +1,185 @@
+{
+  "metadata": {
+    "python": "3.12.14",
+    "pycryptodome": "3.24.1",
+    "system": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "runs_per_operation": 20,
+    "timer": "time.perf_counter_ns",
+    "time_unit": "milliseconds",
+    "notes": "Local machine measurements, including Python call overhead; no network RTT",
+    "total_elapsed_seconds": 45.604
+  },
+  "signatures": {
+    "RSA-2048": {
+      "keygen": {
+        "runs": 20,
+        "mean_ms": 452.45888,
+        "median_ms": 337.27573,
+        "stdev_ms": 339.15399,
+        "min_ms": 45.6526,
+        "max_ms": 1266.31399
+      },
+      "sign": {
+        "runs": 20,
+        "mean_ms": 1.46406,
+        "median_ms": 1.30729,
+        "stdev_ms": 0.43966,
+        "min_ms": 1.24373,
+        "max_ms": 3.02362
+      },
+      "verify": {
+        "runs": 20,
+        "mean_ms": 0.52018,
+        "median_ms": 0.36785,
+        "stdev_ms": 0.48254,
+        "min_ms": 0.32926,
+        "max_ms": 2.0924
+      },
+      "public_key_pem_bytes": 450,
+      "private_key_pem_bytes": 1674,
+      "signature_bytes": 256
+    },
+    "RSA-3072": {
+      "keygen": {
+        "runs": 20,
+        "mean_ms": 1593.26745,
+        "median_ms": 1449.06228,
+        "stdev_ms": 942.07486,
+        "min_ms": 316.19301,
+        "max_ms": 3161.47118
+      },
+      "sign": {
+        "runs": 20,
+        "mean_ms": 3.5579,
+        "median_ms": 3.45558,
+        "stdev_ms": 0.4292,
+        "min_ms": 3.16977,
+        "max_ms": 4.99471
+      },
+      "verify": {
+        "runs": 20,
+        "mean_ms": 0.63977,
+        "median_ms": 0.59347,
+        "stdev_ms": 0.14151,
+        "min_ms": 0.51706,
+        "max_ms": 1.114
+      },
+      "public_key_pem_bytes": 624,
+      "private_key_pem_bytes": 2454,
+      "signature_bytes": 384
+    },
+    "ECDSA-P256": {
+      "keygen": {
+        "runs": 20,
+        "mean_ms": 0.27826,
+        "median_ms": 0.02788,
+        "stdev_ms": 1.1075,
+        "min_ms": 0.02669,
+        "max_ms": 4.98332
+      },
+      "sign": {
+        "runs": 20,
+        "mean_ms": 0.61113,
+        "median_ms": 0.60123,
+        "stdev_ms": 0.07872,
+        "min_ms": 0.50405,
+        "max_ms": 0.86502
+      },
+      "verify": {
+        "runs": 20,
+        "mean_ms": 1.50043,
+        "median_ms": 1.44726,
+        "stdev_ms": 0.24972,
+        "min_ms": 1.264,
+        "max_ms": 2.25493
+      },
+      "public_key_pem_bytes": 177,
+      "private_key_pem_bytes": 240,
+      "signature_bytes": 64
+    }
+  },
+  "key_exchange": {
+    "ECDH-P256": {
+      "keypair_generation": {
+        "runs": 20,
+        "mean_ms": 0.04907,
+        "median_ms": 0.04116,
+        "stdev_ms": 0.02682,
+        "min_ms": 0.0358,
+        "max_ms": 0.15744
+      },
+      "one_side_agreement": {
+        "runs": 20,
+        "mean_ms": 1.53047,
+        "median_ms": 1.51343,
+        "stdev_ms": 0.18485,
+        "min_ms": 1.26147,
+        "max_ms": 1.93072
+      }
+    },
+    "DH-2048": {
+      "keypair_generation": {
+        "runs": 20,
+        "mean_ms": 19.81219,
+        "median_ms": 18.69475,
+        "stdev_ms": 4.00636,
+        "min_ms": 16.71665,
+        "max_ms": 33.5631
+      },
+      "one_side_agreement": {
+        "runs": 20,
+        "mean_ms": 44.35037,
+        "median_ms": 44.08036,
+        "stdev_ms": 2.47219,
+        "min_ms": 41.35816,
+        "max_ms": 51.50999
+      }
+    }
+  },
+  "aead": {
+    "AES-256-GCM": {
+      "plaintext_bytes": 1048576,
+      "encryption": {
+        "runs": 20,
+        "mean_ms": 3.6043,
+        "median_ms": 3.17214,
+        "stdev_ms": 1.58732,
+        "min_ms": 2.86158,
+        "max_ms": 10.14458
+      },
+      "decryption": {
+        "runs": 20,
+        "mean_ms": 2.62821,
+        "median_ms": 2.45904,
+        "stdev_ms": 0.56232,
+        "min_ms": 2.25255,
+        "max_ms": 4.78685
+      },
+      "nonce_bytes": 12,
+      "tag_bytes": 16,
+      "ciphertext_bytes": 1048576
+    },
+    "ChaCha20-Poly1305": {
+      "plaintext_bytes": 1048576,
+      "encryption": {
+        "runs": 20,
+        "mean_ms": 5.13113,
+        "median_ms": 4.89586,
+        "stdev_ms": 0.5692,
+        "min_ms": 4.5636,
+        "max_ms": 6.47032
+      },
+      "decryption": {
+        "runs": 20,
+        "mean_ms": 4.86167,
+        "median_ms": 4.69377,
+        "stdev_ms": 0.7636,
+        "min_ms": 4.36004,
+        "max_ms": 7.61822
+      },
+      "nonce_bytes": 12,
+      "tag_bytes": 16,
+      "ciphertext_bytes": 1048576
+    }
+  }
+}

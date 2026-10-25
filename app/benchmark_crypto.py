@@ -36,6 +36,12 @@ def describe(values):
     }
 
 
+def pem_size_bytes(key):
+    """RSA exports bytes; ECC exports str. Count the serialized PEM bytes."""
+    pem = key.export_key(format='PEM')
+    return len(pem.encode('utf-8') if isinstance(pem, str) else pem)
+
+
 def measure_signatures(runs, result):
     message = b'Mat ma hoc - BTL2 benchmark - same message for all algorithms'
     h = SHA256.new(message)
@@ -60,8 +66,8 @@ def measure_signatures(runs, result):
             sig_sizes.append(len(signature))
         result['signatures'][algorithm] = {
             'keygen': describe(keygen_times), 'sign': describe(sign_times),
-            'verify': describe(verify_times), 'public_key_pem_bytes': len(public.export_key(format='PEM').encode()),
-            'private_key_pem_bytes': len(key.export_key(format='PEM').encode()),
+            'verify': describe(verify_times), 'public_key_pem_bytes': pem_size_bytes(public),
+            'private_key_pem_bytes': pem_size_bytes(key),
             'signature_bytes': sig_sizes[0],
         }
 
