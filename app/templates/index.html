@@ -1,52 +1,138 @@
 <!doctype html>
-<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kênh liên lạc an toàn và Kerberos</title>
-<link rel="stylesheet" href="/static/style.css"></head>
-<body><main>
-<header><h1>Kênh liên lạc an toàn</h1><p>Thực hành mật mã • Sinh khóa → chứng thư → ECDH/HKDF → AEAD và chữ ký • Mở rộng Kerberos.</p>
-<p>Mô phỏng trên một Flask server. Khóa riêng nằm trong bộ nhớ backend; dữ liệu phiên mất khi khởi động lại hoặc không hoạt động 30 phút.</p></header>
-<section><h2>1. Sinh khóa cho các thực thể</h2>
-<div class="grid"><label>Tên Alice<input id="alice-name" value="Alice" maxlength="50"></label><label>Tên Bob<input id="bob-name" value="Bob" maxlength="50"></label><label>Tên CA<input id="ca-name" value="Demo-CA" maxlength="50"></label></div>
-<label>Thuật toán chữ ký<select id="signature-algorithm"><option value="ECDSA">ECDSA P-256</option><option value="RSA-PSS">RSA-PSS 2048</option><option value="Ed25519">Ed25519</option></select></label>
-<p>Đổi tên hoặc thuật toán rồi nhấn Sinh khóa để áp dụng. Bộ khóa mới thay bộ khóa và chứng thư cũ của phiên mô phỏng.</p>
-<button id="setup">Sinh khóa Alice, Bob và CA</button><pre id="setup-out" aria-live="polite"></pre></section>
-<section><h2>2. Dữ liệu dùng để băm, ký và mã hóa</h2>
-<label>Nguồn dữ liệu<select id="source"><option value="text">Văn bản</option><option value="file">Tệp đã tải lên</option></select></label>
-<label>Thông điệp (1–200 ký tự)<textarea id="message" maxlength="200">Xin chào Bob!</textarea></label>
-<label>Tệp bất kỳ (tối đa 10 MiB)<input id="data-file" type="file"></label><button id="upload">Tải tệp lên</button><pre id="upload-out" aria-live="polite"></pre>
-<label>Khóa HMAC<input id="hmac-key" value="demo-hmac-key" maxlength="200"></label>
-<label>Thẻ HMAC cần kiểm tra (hex; để trống để kiểm tra thẻ vừa sinh)<input id="hmac-tag" maxlength="64"></label>
-<div class="buttons"><button id="hash">Băm và kiểm tra HMAC</button><button id="sign">Ký và thử xác minh</button></div>
-<h3>Băm và HMAC</h3><pre id="hash-out" aria-live="polite"></pre><h3>Chữ ký số</h3><pre id="sign-out" aria-live="polite"></pre></section>
-<section><h2>3. Chứng thư JSON và chuỗi tin cậy</h2>
-<button id="certificates">CA cấp chứng thư</button><pre id="certificates-out" aria-live="polite"></pre>
-<label>Kịch bản kiểm tra<select id="cert-scenario"><option value="valid">Hợp lệ</option><option value="tampered">Sửa khóa công khai trong chứng thư</option><option value="expired">Chứng thư hết hạn</option><option value="wrong_subject">Sai tên chủ thể</option><option value="revoked">Serial nằm trong danh sách thu hồi</option></select></label>
-<button id="check-certificate">Kiểm tra chuỗi CA → Alice</button><pre id="check-certificate-out" aria-live="polite"></pre>
-<p>Các kịch bản lỗi dùng bản sao thử nghiệm; không làm thay đổi chứng thư hợp lệ đã cấp. Chứng thư JSON minh họa, không phải X.509.</p></section>
-<section><h2>4. Kênh Alice–Eve–Bob</h2>
-<label>Chế độ DH<select id="mode"><option value="authenticated">Có chữ ký và chứng thư</option><option value="unauthenticated">Không xác thực</option></select></label>
-<label>Thuật toán AEAD<select id="algorithm"><option>AES-256-GCM</option><option>ChaCha20-Poly1305</option></select></label>
-<p>Dùng văn bản hoặc tệp đã chọn ở mục 2. Chế độ xác thực cần sinh khóa và cấp chứng thư trước.</p>
-<button id="channel">Thực hiện trao đổi khóa và truyền dữ liệu</button><pre id="channel-out" aria-live="polite"></pre>
-<p id="downloads" hidden><a id="download-ciphertext" href="/api/lab/download/ciphertext">Tải bản mã đầy đủ</a> · <a id="download-plaintext" href="/api/lab/download/plaintext">Tải bản giải mã</a></p>
-<p>Kết quả chỉ hiển thị bản xem trước của dữ liệu lớn. Tệp tải xuống là kết quả của lần chạy kênh truyền gần nhất.</p></section>
-<section><h2>5. DH số nhỏ và các thử nghiệm độc lập</h2>
-<div class="grid"><label>p (nguyên tố ≤ 65535)<input type="number" id="dh-p" value="23"></label><label>g (phần tử sinh)<input type="number" id="dh-g" value="5"></label><label>Số mũ a<input type="number" id="dh-a" value="6"></label><label>Số mũ b<input type="number" id="dh-b" value="15"></label></div>
-<button id="custom-dh">Tính DH theo tham số nhập</button><pre id="custom-dh-out"></pre>
-<div class="buttons"><button id="toy-dh">DH và MITM mẫu p=23, g=5</button><button id="ecdh">Thử ECDH P-256</button><button id="encrypt">Thử AEAD và sửa bit</button><button id="mitm">MITM mẫu cả hai chế độ</button></div>
-<p>Các nút thử nghiệm này chạy độc lập, dùng văn bản ở mục 2; không tái sử dụng bộ khóa hoặc tệp của kênh chính.</p>
-<pre id="toy-dh-out"></pre><pre id="ecdh-out"></pre><pre id="encrypt-out"></pre><div id="mitm-out"></div>
-<h3>ECDSA số nhỏ</h3><p>E₁₇(3,5), G=(5,3), n=23, d=7, h=10, k=5.</p>
-<button id="toy-ecdsa">Ký và kiểm tra ECDSA số nhỏ</button><pre id="toy-ecdsa-out"></pre></section>
-<section><h2>6. Bảng đo lường</h2>
-<p>Kết quả kèm theo được đo trên môi trường kiểm thử, không phải máy của nhóm. Để đo lại, chạy <code>python benchmark_crypto.py --runs 20</code> trong thư mục <code>app</code>.</p>
-<button id="bench">Tải kết quả đã đo</button><div id="bench-table"></div><pre id="bench-out"></pre>
-<p>ECDH bao gồm HKDF; DH-2048 đo bí mật DH thô. Thời gian AEAD gồm cả chuyển đổi hex và chi phí Python. SHA-1/MD5 chỉ phục vụ so sánh.</p></section>
-<section><h2>7. Kerberos tối giản</h2>
-<p>Kịch bản riêng với Alice, AS, TGS và dịch vụ Bob. Mật khẩu demo: <code>demo123</code>. Vé có hạn 120 giây; độ lệch thời gian authenticator tối đa 30 giây.</p>
-<label>Mật khẩu Alice<input id="kerberos-password" type="password" value="demo123" maxlength="200"></label>
-<div class="buttons">
-<button id="krb-as" data-kerberos="as">1. AS cấp TGT</button><button id="krb-tgs" data-kerberos="tgs">2. TGS cấp vé Bob</button><button id="krb-service" data-kerberos="service">3. Bob xác thực</button><button id="krb-replay" data-kerberos="replay">4. Phát lại yêu cầu cũ</button><button id="krb-new" data-kerberos="service">5. Cùng vé, authenticator mới</button><button id="krb-expired" data-kerberos="expired">6. Thử vé hết hạn</button><button id="krb-stale" data-kerberos="stale">Thử timestamp cũ</button><button id="krb-replay-tgs" data-kerberos="replay-tgs">Phát lại yêu cầu TGS</button>
-</div><pre id="kerberos-log" aria-live="polite"></pre><pre id="kerberos-out"></pre>
-<p>Thử vé hết hạn sử dụng thời gian mô phỏng; không thay đổi đồng hồ máy hay làm hết hạn vé đang giữ. Phát lại chính authenticator cũ bị từ chối; vé còn hạn với authenticator mới vẫn được chấp nhận.</p></section>
-</main><script src="/static/script.js"></script></body></html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f6f8">
+    <title>Kênh liên lạc an toàn</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <main id="app">
+      <section class="input-pane" id="input-pane" aria-label="Khu vực nhập dữ liệu">
+        <header class="app-header">
+          <div class="brand-mark" aria-hidden="true">MMH</div>
+          <div class="eyebrow">PHÒNG THỰC HÀNH MẬT MÃ</div>
+          <h1>Kênh liên lạc an toàn</h1>
+          <p class="lead">Thực hành trao đổi khóa, chữ ký số, chứng thư và mã hóa dữ liệu.</p>
+          <p class="notice">Mô phỏng trên một Flask server. Khóa riêng nằm trong bộ nhớ backend; dữ liệu phiên mất khi khởi động lại hoặc không hoạt động 30 phút.</p>
+        </header>
+
+        <div id="input-panels">
+          <section class="form-panel">
+            <div class="panel-heading"><span class="step-number">01</span><div><h2>Sinh khóa cho các thực thể</h2><p>Tạo bộ khóa Alice, Bob và CA cho phiên mô phỏng.</p></div></div>
+            <div class="grid">
+              <label>Tên Alice<input id="alice-name" value="Alice" maxlength="50"></label>
+              <label>Tên Bob<input id="bob-name" value="Bob" maxlength="50"></label>
+              <label>Tên CA<input id="ca-name" value="Demo-CA" maxlength="50"></label>
+            </div>
+            <label>Thuật toán chữ ký<select id="signature-algorithm"><option value="ECDSA">ECDSA P-256</option><option value="RSA-PSS">RSA-PSS 2048</option><option value="Ed25519">Ed25519</option></select></label>
+            <p class="helper">Đổi tên hoặc thuật toán rồi nhấn Sinh khóa để áp dụng. Bộ khóa mới thay bộ khóa và chứng thư cũ của phiên mô phỏng.</p>
+            <button id="setup" class="primary-button">Sinh khóa Alice, Bob và CA</button>
+          </section>
+
+          <section class="form-panel" hidden>
+            <div class="panel-heading"><span class="step-number">02</span><div><h2>Dữ liệu, băm và chữ ký</h2><p>Chọn văn bản hoặc tải tệp để làm dữ liệu đầu vào.</p></div></div>
+            <label>Nguồn dữ liệu<select id="source"><option value="text">Văn bản</option><option value="file">Tệp đã tải lên</option></select></label>
+            <label>Thông điệp (1–200 ký tự)<textarea id="message" maxlength="200">Xin chào Bob!</textarea></label>
+            <div class="file-row"><label>Tệp bất kỳ (tối đa 10 MiB)<input id="data-file" type="file"></label><button id="upload" class="secondary-button">Tải tệp lên</button></div>
+            <label>Khóa HMAC<input id="hmac-key" value="demo-hmac-key" maxlength="200"></label>
+            <label>Thẻ HMAC cần kiểm tra <span class="label-hint">(hex, có thể để trống)</span><input id="hmac-tag" maxlength="64" placeholder="Nhập thẻ HMAC nếu muốn kiểm tra"></label>
+            <div class="buttons"><button id="hash" class="primary-button">Băm và kiểm tra HMAC</button><button id="sign" class="secondary-button">Ký và thử xác minh</button></div>
+          </section>
+
+          <section class="form-panel" hidden>
+            <div class="panel-heading"><span class="step-number">03</span><div><h2>Chứng thư và chuỗi tin cậy</h2><p>CA cấp chứng thư, sau đó kiểm tra các tình huống tin cậy.</p></div></div>
+            <button id="certificates" class="primary-button">CA cấp chứng thư</button>
+            <label>Kịch bản kiểm tra<select id="cert-scenario"><option value="valid">Hợp lệ</option><option value="tampered">Sửa khóa công khai trong chứng thư</option><option value="expired">Chứng thư hết hạn</option><option value="wrong_subject">Sai tên chủ thể</option><option value="revoked">Serial nằm trong danh sách thu hồi</option></select></label>
+            <button id="check-certificate" class="secondary-button">Kiểm tra chuỗi CA → Alice</button>
+            <p class="helper">Các kịch bản lỗi dùng bản sao thử nghiệm; không làm thay đổi chứng thư hợp lệ đã cấp. Chứng thư JSON minh họa, không phải X.509.</p>
+          </section>
+
+          <section class="form-panel" hidden>
+            <div class="panel-heading"><span class="step-number">04</span><div><h2>Kênh Alice–Eve–Bob</h2><p>Thiết lập xác thực và thuật toán mã hóa cho lần truyền.</p></div></div>
+            <label>Chế độ DH<select id="mode"><option value="authenticated">Có chữ ký và chứng thư</option><option value="unauthenticated">Không xác thực</option></select></label>
+            <label>Thuật toán AEAD<select id="algorithm"><option>AES-256-GCM</option><option>ChaCha20-Poly1305</option></select></label>
+            <p class="helper">Dùng văn bản hoặc tệp đã chọn ở mục 2. Chế độ xác thực cần sinh khóa và cấp chứng thư trước.</p>
+            <button id="channel" class="primary-button">Thực hiện trao đổi khóa và truyền dữ liệu</button>
+            <p class="helper">Kết quả chỉ hiển thị bản xem trước của dữ liệu lớn. Tệp tải xuống là kết quả của lần chạy kênh truyền gần nhất.</p>
+          </section>
+
+          <section class="form-panel" hidden>
+            <div class="panel-heading"><span class="step-number">05</span><div><h2>DH số nhỏ và thử nghiệm</h2><p>Thay đổi tham số hoặc chạy các ví dụ độc lập.</p></div></div>
+            <div class="grid">
+              <label>p (nguyên tố ≤ 65535)<input type="number" id="dh-p" value="23"></label>
+              <label>g (phần tử sinh)<input type="number" id="dh-g" value="5"></label>
+              <label>Số mũ a<input type="number" id="dh-a" value="6"></label>
+              <label>Số mũ b<input type="number" id="dh-b" value="15"></label>
+            </div>
+            <button id="custom-dh" class="primary-button">Tính DH theo tham số nhập</button>
+            <div class="buttons experiment-buttons"><button id="toy-dh" class="secondary-button">DH và MITM mẫu p=23, g=5</button><button id="ecdh" class="secondary-button">Thử ECDH P-256</button><button id="encrypt" class="secondary-button">Thử AEAD và sửa bit</button><button id="mitm" class="secondary-button">MITM mẫu cả hai chế độ</button></div>
+            <p class="helper">Các nút thử nghiệm này chạy độc lập, dùng văn bản ở mục 2; không tái sử dụng bộ khóa hoặc tệp của kênh chính.</p>
+            <div class="subsection-heading"><h3>ECDSA số nhỏ</h3><span>E₁₇(3,5), G=(5,3), n=23, d=7, h=10, k=5</span></div>
+            <button id="toy-ecdsa" class="secondary-button">Ký và kiểm tra ECDSA số nhỏ</button>
+          </section>
+
+          <section class="form-panel" hidden>
+            <div class="panel-heading"><span class="step-number">06</span><div><h2>Bảng đo lường</h2><p>Xem các số đo mật mã đã ghi nhận trong dự án.</p></div></div>
+            <p class="helper">Kết quả kèm theo được đo trên môi trường kiểm thử, không phải máy của nhóm. Để đo lại, chạy <code>python benchmark_crypto.py --runs 20</code> trong thư mục <code>app</code>.</p>
+            <button id="bench" class="primary-button">Tải kết quả đã đo</button>
+            <p class="helper">ECDH bao gồm HKDF; DH-2048 đo bí mật DH thô. Thời gian AEAD gồm cả chuyển đổi hex và chi phí Python. SHA-1/MD5 chỉ phục vụ so sánh.</p>
+          </section>
+
+          <section class="form-panel" hidden>
+            <div class="panel-heading"><span class="step-number">07</span><div><h2>Kerberos tối giản</h2><p>Mô phỏng AS, TGS và dịch vụ Bob để quan sát xác thực, vé và replay.</p></div></div>
+            <div class="demo-credential"><span>Mật khẩu demo</span><code>demo123</code></div>
+            <p class="helper">Vé có hạn 120 giây; độ lệch thời gian authenticator tối đa 30 giây.</p>
+            <label>Mật khẩu Alice<input id="kerberos-password" type="password" value="demo123" maxlength="200"></label>
+            <div class="buttons kerberos-buttons">
+              <button data-kerberos="as">1. AS cấp TGT</button><button data-kerberos="tgs">2. TGS cấp vé Bob</button><button data-kerberos="service">3. Bob xác thực</button><button data-kerberos="replay">4. Phát lại yêu cầu cũ</button><button data-kerberos="service">5. Cùng vé, authenticator mới</button><button data-kerberos="expired">6. Thử vé hết hạn</button><button data-kerberos="stale">Thử timestamp cũ</button><button data-kerberos="replay-tgs">Phát lại yêu cầu TGS</button>
+            </div>
+            <p class="helper">Thử vé hết hạn sử dụng thời gian mô phỏng; không thay đổi đồng hồ máy hay làm hết hạn vé đang giữ. Phát lại chính authenticator cũ bị từ chối; vé còn hạn với authenticator mới vẫn được chấp nhận.</p>
+          </section>
+        </div>
+      </section>
+
+      <aside class="output-pane" aria-label="Kết quả và đầu ra">
+        <header class="output-header">
+          <div class="output-header-top"><div><div class="eyebrow">KẾT QUẢ PHIÊN LÀM VIỆC</div><h2>Đầu ra</h2></div><span class="live-indicator"><span></span> SẴN SÀNG</span></div>
+          <p id="output-context">Chọn một chức năng bên trái để xem kết quả tương ứng.</p>
+        </header>
+        <div class="output-content" id="output-content">
+          <section class="output-group" data-output-group="0">
+            <div class="result-card"><div class="result-heading"><h3>Khởi tạo khóa</h3><span class="result-type">SETUP</span></div><pre id="setup-out" aria-live="polite"></pre></div>
+          </section>
+          <section class="output-group" data-output-group="1" hidden>
+            <div class="result-card"><div class="result-heading"><h3>Tải dữ liệu</h3><span class="result-type">UPLOAD</span></div><pre id="upload-out" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>Băm và HMAC</h3><span class="result-type">HASH / HMAC</span></div><pre id="hash-out" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>Chữ ký số</h3><span class="result-type">SIGNATURE</span></div><pre id="sign-out" aria-live="polite"></pre></div>
+          </section>
+          <section class="output-group" data-output-group="2" hidden>
+            <div class="result-card"><div class="result-heading"><h3>Chứng thư đã cấp</h3><span class="result-type">CERTIFICATE</span></div><pre id="certificates-out" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>Kiểm tra chuỗi tin cậy</h3><span class="result-type">VALIDATION</span></div><pre id="check-certificate-out" aria-live="polite"></pre></div>
+          </section>
+          <section class="output-group" data-output-group="3" hidden>
+            <div class="result-card"><div class="result-heading"><h3>Kênh truyền dữ liệu</h3><span class="result-type">ALICE → BOB</span></div><pre id="channel-out" aria-live="polite"></pre><p id="downloads" class="download-links" hidden><a id="download-ciphertext" href="/api/lab/download/ciphertext">Tải bản mã đầy đủ</a><a id="download-plaintext" href="/api/lab/download/plaintext">Tải bản giải mã</a></p></div>
+          </section>
+          <section class="output-group" data-output-group="4" hidden>
+            <div class="result-card"><div class="result-heading"><h3>DH với tham số nhập</h3><span class="result-type">CUSTOM DH</span></div><pre id="custom-dh-out" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>DH số nhỏ và MITM</h3><span class="result-type">DEMO</span></div><pre id="toy-dh-out" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>ECDH P-256</h3><span class="result-type">ECDH</span></div><pre id="ecdh-out" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>AEAD và kiểm tra toàn vẹn</h3><span class="result-type">AEAD</span></div><pre id="encrypt-out" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>Mô phỏng MITM</h3><span class="result-type">MITM</span></div><div id="mitm-out"></div></div>
+            <div class="result-card"><div class="result-heading"><h3>ECDSA số nhỏ</h3><span class="result-type">TOY ECDSA</span></div><pre id="toy-ecdsa-out" aria-live="polite"></pre></div>
+          </section>
+          <section class="output-group" data-output-group="5" hidden>
+            <div class="result-card"><div class="result-heading"><h3>Bảng benchmark</h3><span class="result-type">MEASUREMENTS</span></div><div id="bench-table"></div><pre id="bench-out" aria-live="polite"></pre></div>
+          </section>
+          <section class="output-group" data-output-group="6" hidden>
+            <div class="result-card"><div class="result-heading"><h3>Nhật ký Kerberos</h3><span class="result-type">AUTH LOG</span></div><pre id="kerberos-log" class="kerberos-log" aria-live="polite"></pre></div>
+            <div class="result-card"><div class="result-heading"><h3>Kết quả thao tác</h3><span class="result-type">RESPONSE</span></div><pre id="kerberos-out"></pre></div>
+          </section>
+        </div>
+        <footer class="output-footer"><span class="footer-dot"></span> Dữ liệu hiển thị thuộc phiên trình duyệt hiện tại.</footer>
+      </aside>
+    </main>
+    <script src="/static/script.js"></script>
+  </body>
+</html>

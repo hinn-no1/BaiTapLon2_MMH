@@ -282,8 +282,9 @@ function renderBenchmarks(value) {
   function initFunctionMenu() {
       if (document.getElementById("function-menu")) return;
 
-      const panels = Array.from(document.querySelectorAll("main > section"));
-
+      const panels = Array.from(document.querySelectorAll("#input-panels > .form-panel"));
+      const outputPanels = Array.from(document.querySelectorAll(".output-group"));
+      const outputContext = document.getElementById("output-context");
       const labels = [
         "1. Sinh khóa",
         "2. Băm & chữ ký",
@@ -293,8 +294,16 @@ function renderBenchmarks(value) {
         "6. Benchmark",
         "7. Kerberos",
       ];
-
-      if (panels.length !== labels.length) {
+      const descriptions = [
+        "Nhập tên và chọn thuật toán, sau đó sinh bộ khóa cho Alice, Bob và CA.",
+        "Nhập văn bản hoặc tải tệp, sau đó băm, tạo HMAC hoặc chữ ký số.",
+        "CA cấp chứng thư, rồi chọn một kịch bản để kiểm tra chuỗi tin cậy.",
+        "Chọn chế độ trao đổi khóa và thuật toán mã hóa cho kênh truyền.",
+        "Thay đổi tham số hoặc chạy một ví dụ mật mã độc lập.",
+        "Tải bảng đo để xem các kết quả benchmark có sẵn.",
+        "Chạy từng bước Kerberos và theo dõi nhật ký xác thực ở đây.",
+      ];
+      if (panels.length !== labels.length || outputPanels.length !== labels.length) {
         console.warn("Không tìm thấy đủ 7 phần chức năng.");
         return;
       }
@@ -314,10 +323,12 @@ function renderBenchmarks(value) {
           const selected = position === index;
 
           panel.hidden = !selected;
+          outputPanels[position].hidden = !selected;
 
           buttons[position].classList.toggle("is-active", selected);
           buttons[position].setAttribute("aria-pressed", String(selected));
         });
+        outputContext.textContent = descriptions[index];
         const selectedButton = buttons[index];
 
         menuItems.scrollTo({
@@ -328,10 +339,8 @@ function renderBenchmarks(value) {
         });
 
         if (userAction) {
-          window.scrollTo({
-            top: 0,
-            behavior: "auto",
-          });
+          document.getElementById("input-pane").scrollTo({ top: 0, behavior: "auto" });
+          document.getElementById("output-content").scrollTo({ top: 0, behavior: "auto" });
         }
       }
 
@@ -355,7 +364,10 @@ function renderBenchmarks(value) {
         buttons.push(button);
         menuItems.appendChild(button);
       });
-      document.body.prepend(menu);
+      document.getElementById("input-pane").insertBefore(
+        menu,
+        document.getElementById("input-panels"),
+      );
       selectPanel(0);
     }
 
